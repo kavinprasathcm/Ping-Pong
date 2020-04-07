@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        body{
+        background-color:rgb(34, 24, 4);
+        color:white;
+        }
+        .details{
+        position:absolute;
+        left:35%;
+        top:30%;
+        background-color: rgb(3, 12, 61);
+        border:solid 1px black;
+        box-shadow:0 0 10px rgb(255, 255, 255);
+        border-radius:10px;
+        padding:50px;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <script>
+         function check()
+        {
+            let uname = document.getElementById('username').value;
+            localStorage.setItem('user',uname);           
+            if(uname !="")
+            {
+                let div = document.getElementById('entry');
+                let ref = document.createElement('a');
+                ref.href = "game.html";
+                let button = document.createElement('button');
+                button.textContent ='Start Gaming'; 
+                ref.append(button);
+                div.append(ref);
+            }
+            else
+            {
+                alert("Enter your name to Start Gaming");
+            }
+        }
+    </script>
+    <div class="details" id="entry">
+        <p id="greet">HELLO THERE! Enter your name and start playing..</p>
+        <input type="text" id="username" name="uname"/>
+        <button id="anchor" onclick="check()">Enter</button><br><br>
+    </div>
+</body>
+</html>

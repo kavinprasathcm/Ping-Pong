@@ -1,0 +1,217 @@
+<html>
+<head>
+    <title>PING PONG</title>
+</head>
+<body>
+<link rel="stylesheet" href="style.css">
+<div class="scoreCard">
+    <h2>
+        <span id="playerScore">Player :</span>
+        <span id="Score1">0</span>
+        <span id="playerScore">Computer :</span>
+        <span id="Score2">0</span>
+    </h2>
+</div>
+<div id="play-area">
+    <canvas id="gameCanvas" width="1000" height="525"></canvas>
+</div>
+<script>
+    var canvas;
+    var canvasContext;
+
+    // for x-axis movement
+    var ballX = 500;
+    var ballSpeedX = 10;
+
+    // for y-axis movement
+    var ballY = 50;
+    var ballSpeedY = 5;
+
+    //for paddle size
+    var paddle1Y = 250;
+    var paddle2Y = 250;
+    const PADDLE_THICK = 10;
+    const PADDLE_HEIGHT = 100;
+
+    //adding sounds
+    let hit = new Audio();
+    let wall = new Audio();
+    let userScore = new Audio();
+    let comScore = new Audio();
+
+    hit.src = "sounds/hit.mp3";
+    wall.src = "sounds/wall.mp3";
+    comScore.src = "sounds/comScore.mp3";
+    userScore.src = "sounds/userScore.mp3";
+
+    //initial scores
+    var player1Score = 0;
+    var player2Score = 0;
+
+    //winning score
+    const WINNING_SCORE = 3;
+
+    //winning screen
+    var showingWinScreen = false;
+
+    function handleMouseClick(evt) {
+        if (showingWinScreen) {
+            player1Score = 0;
+            player2Score = 0;
+            showingWinScreen = false;
+        }
+    }
+
+    //starts after the window loaded
+    window.onload = function () {
+        canvas = document.getElementById('gameCanvas');
+        canvasContext = canvas.getContext('2d');
+
+        var framesPerSecond = 30;
+        setInterval(function () {
+            moveEverything();
+            drawEverything();
+        }, 1000 / framesPerSecond);
+
+        canvas.addEventListener('mousedown', handleMouseClick);
+        canvas.addEventListener('mousemove',
+            function (evt) {
+                var mousePos = calculateMousePos(evt);
+                paddle1Y = mousePos.y - (PADDLE_HEIGHT / 2);
+            });
+    }
+
+    // movement functions
+    function computerMovement() {
+        var paddle2Center = paddle2Y + (PADDLE_HEIGHT / 2);
+        if (paddle2Center < ballY - 35) {
+            paddle2Y += 6;
+        }
+        else if (paddle2Center > ballY + 35) {
+            paddle2Y -= 6;
+        }
+    }
+
+    function moveEverything() {
+        if (showingWinScreen) {
+            return;
+        }
+        computerMovement();
+        ballX += ballSpeedX;
+        ballY += ballSpeedY;
+        if (ballX < 5) {
+            if (ballY > paddle1Y && ballY < paddle1Y + PADDLE_HEIGHT) {
+                ballSpeedX = -ballSpeedX;
+                var deltaY = ballY - (paddle1Y + PADDLE_HEIGHT / 2);
+                hit.play();
+                ballSpeedY = deltaY * 0.35;
+            }
+            else {
+                player2Score++;
+                let score1 = document.getElementById('Score1');
+                score1.innerText=player1Score;
+                let score2 = document.getElementById('Score2');
+                score2.innerText=player2Score;
+                comScore.play();
+                ballReset();
+            }
+        }
+        if (ballX > canvas.width-5) {
+            if (ballY > paddle2Y && ballY < paddle2Y + PADDLE_HEIGHT) {
+                ballSpeedX = -ballSpeedX;
+                var deltaY = ballY - (paddle2Y + PADDLE_HEIGHT / 2);
+                hit.play();
+                ballSpeedY = deltaY * 0.35;
+            }
+            else {
+                player1Score++;
+                let score1 = document.getElementById('Score1');
+                score1.innerText=player1Score;
+                let score2 = document.getElementById('Score2');
+                score2.innerText=player2Score;
+                userScore.play();
+                ballReset();
+            }
+        }
+        if (ballY > canvas.height || ballY < 0) {
+            wall.play();
+            ballSpeedY = -ballSpeedY;
+        }
+    }
+
+    //Creation functions
+    function drawNet() {
+        for (var i = 0; i < canvas.height; i=i+50) {
+            colourRect();
+            colourRect(canvas.width / 2 - 1, i, 2, 20, 'white');
+        }
+    }
+
+    function drawEverything() {
+        //this makes the screen colour
+        colourRect(0, 0, canvas.width, canvas.height, 'green');
+
+        if (showingWinScreen) {
+            canvasContext.fillStyle = 'white';
+            canvasContext.font = "20px verdona";
+            if (player1Score >= WINNING_SCORE) {
+                canvasContext.fillText(localStorage.getItem('user')+" Won!", 400, 200);
+            }
+            else if (player2Score >= WINNING_SCORE) {
+                canvasContext.fillText("Computer Won!", 400, 200);
+            }
+            canvasContext.fillText("click to continue", 400, 500);
+            return;
+        }
+
+        //this provides the net
+        drawNet();
+
+        // this makes the left moving pad
+        colourRect(0, paddle1Y, PADDLE_THICK, PADDLE_HEIGHT, 'white');
+
+        //this makes the right computer paddle
+        colourRect(canvas.width - 10, paddle2Y, PADDLE_THICK, PADDLE_HEIGHT, 'white');
+
+        // this makes the ball
+        colourCircle(ballX, ballY, 10, 'white');
+    }
+
+    function colourCircle(centerX, centerY, radius, drawColor) {
+        canvasContext.fillStyle = drawColor;
+        canvasContext.beginPath();
+        canvasContext.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
+        canvasContext.fill();
+    }
+
+    function colourRect(leftX, topY, width, height, drawColor) {
+        canvasContext.fillStyle = drawColor;
+        canvasContext.fillRect(leftX, topY, width, height);
+    }
+
+    //finding mouse co-ordinates
+    function calculateMousePos(evt) {
+        var rect = canvas.getBoundingClientRect();
+        var root = document.documentElement;
+        var mouseX = evt.clientX - rect.left - root.scrollLeft;
+        var mouseY = evt.clientY - rect.top - root.scrollTop;
+        return {
+            x: mouseX,
+            y: mouseY
+        };
+    }
+
+    //ball reset
+    function ballReset() {
+        if (player1Score >= WINNING_SCORE || player2Score >= WINNING_SCORE) {
+            showingWinScreen = true;
+        }
+        ballSpeedX = -ballSpeedX;
+        ballX = canvas.width / 2;
+        ballY = canvas.height / 2;
+    }
+
+</script>
+
+</body>
+</html>

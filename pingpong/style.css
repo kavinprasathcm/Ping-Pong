@@ -1,0 +1,26 @@
+body{
+    background-color: rgb(19, 19, 18);
+    align-items: center;
+}
+
+#gameCanvas{
+    margin-left: 13vw;
+    box-shadow:0 0 10px rgb(255, 255, 255);
+}
+
+.scoreCard{
+    margin-top: auto;
+    margin-left: 5vw;
+    background-color: rgb(65, 177, 241);
+    text-align: center;
+    width: 80%;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgb(255, 255, 255);
+}
+
+#playerScore{
+    margin: 0;
+    padding-left: 50px;
+}
+
+
